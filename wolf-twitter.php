@@ -3,7 +3,7 @@
  * Plugin Name: Wolf Twitter
  * Plugin URI: http://wpwolf.com/plugin/wolf-twitter
  * Description: A widget and a shortcode to display your Twitter Feed
- * Version: 2.0.6
+ * Version: 2.0.6.1
  * Author: WpWolf
  * Author URI: http://wpwolf.com
  * Requires at least: 3.5
@@ -42,7 +42,7 @@ class Wolf_Twitter {
 	var $update_url = 'http://plugins.wpwolf.com/update';
 	var $cache_duration_hour = 2; // cache duration in hour (can be decimal e.g : 1.5)
 
-	function __construct() {
+	public function __construct() {
 
 		define( 'WOLF_TWITTER_URL', plugins_url( '/' . basename( dirname( __FILE__ ) ) ) );
 		define( 'WOLF_TWITTER_DIR', dirname( __FILE__ ) );
@@ -65,7 +65,7 @@ class Wolf_Twitter {
 	/**
 	 * Loads the plugin text domain for translation
 	 */
-	function plugin_textdomain() {
+	public function plugin_textdomain() {
 
 		$domain = 'wolf';
 		$locale = apply_filters( 'wolf', get_locale(), $domain );
@@ -77,15 +77,15 @@ class Wolf_Twitter {
 	/**
 	 * Print twitter styles
 	 */
-	function print_styles() {
-		wp_register_style( 'wolf-twitter', WOLF_TWITTER_URL . '/css/twitter.css', array(), '2.0.6', 'all' );
+	public function print_styles() {
+		wp_register_style( 'wolf-twitter', WOLF_TWITTER_URL . '/css/twitter.css', array(), '2.0.6.1', 'all' );
 		wp_enqueue_style( 'wolf-twitter' );
 	}
 
 	/**
 	 * Display an error
 	 */
-	function twitter_error( $username, $list = false ) {
+	public function twitter_error( $username, $list = false ) {
 
 		$error_message = sprintf( __( 'Our Twitter feed is currently unavailable but you can visit our official twitter page  <a href="%1s" target="_blank">%2s</a>.', 'wolf' ), "http://twitter.com/$username", "@$username"  );
 			
@@ -107,7 +107,7 @@ class Wolf_Twitter {
 	/**
 	 * Get the Twitter feed 
 	 */
-	function get_twitter_feed( $username ) {
+	public function get_twitter_feed( $username ) {
 
 		$trans_key = 'wolf_twitter_'.$username;
 		// 
@@ -143,7 +143,7 @@ class Wolf_Twitter {
 	/**
 	 * Display tweets as list or single tweet 
 	 */
-	function twitter( $username, $count = 3, $list = true ) {
+	public function twitter( $username, $count = 3, $list = true ) {
 		
 		$tweet ='';
 		$data = $this->get_twitter_feed( $username );
@@ -197,7 +197,7 @@ class Wolf_Twitter {
 	/**
 	 * Find url strings, tags and username strings and make them as link
 	 */
-	function  twitter_to_link( $text ) {
+	public function  twitter_to_link( $text ) {
 		
 		// Match URLs
 		$text = preg_replace( '/(^|[^=\"\/])\b((?:\w+:\/\/|www\.)[^\s<]+)((?:\W+|\b)(?:[\s<]|$))/m', '<a href="$0" target="_blank">$0</a>', $text);
@@ -214,29 +214,18 @@ class Wolf_Twitter {
 	/**
 	 * Convert the twitter date to "X ago" type
 	 */        
-	function   twitter_time_ago( $date ) {
-		$h         = date( "H", strtotime( $date ) );
-		$m         = date( "i", strtotime( $date ) );
-		$s         = date( "s", strtotime( $date ) );
-		$d         = date( "d", strtotime( $date ) );
-		$m         = date( "m", strtotime( $date ) );
-		$y         = date( "Y", strtotime( $date ) );
-		$timestamp = mktime( $h,$m,$s,$m,$d,$y);
-		$stf       = 0;
-		$cur_time  = time();
-		$diff      = $cur_time - $timestamp;
-		$phrase = array(__( 'second', 'wolf' ),__( 'minute', 'wolf' ),__( 'hour', 'wolf' ),__( 'day', 'wolf' ),__( 'week', 'wolf' ),__( 'month', 'wolf' ),__( 'year', 'wolf' ),__( 'decade', 'wolf' ) );
-		$length = array(1,60,3600,86400,604800,2630880,31570560,315705600 );
-		for( $i =sizeof( $length ) - 1; ( $i >=0 )&&( ( $no =  $diff/$length[$i] )<=1); $i--); if ( $i < 0 ) $i=0; $_time = $cur_time  -( $diff%$length[$i] );
-		$no = floor( $no); if ( $no <> 1) $phrase[$i] .='s'; $value=sprintf( "%d %s ",$no,$phrase[$i] );
-		if ( ( $stf == 1 ) && ( $i >= 1)&&( ( $cur_tm-$_time) > 0 ) ) $value .= time_ago( $_time);
-		return $value.' '.__( 'ago', 'wolf' );
+	public function twitter_time_ago( $date ) {
+		return esc_html(
+			sprintf(
+				__( '%s ago', 'wolf' ), human_time_diff( strtotime( $date ), current_time( 'timestamp' ) )
+			)
+		);
 	} 
 
 	/**
 	 * Shortcode
 	 */ 
-	function shortcode( $atts) {
+	public function shortcode( $atts ) {
 
 		extract( shortcode_atts( array(
 			'username' => '',
@@ -252,7 +241,7 @@ class Wolf_Twitter {
 	/**
 	 * Plugin update
 	 */
-	function plugin_update() {
+	public function plugin_update() {
 		
 		$plugin_data = get_plugin_data( __FILE__ );
 
@@ -275,7 +264,7 @@ $wolf_twitter = new Wolf_Twitter;
 // Widget function
 function wolf_twitter_widget( $username, $count ) {
 	global $wolf_twitter;
-	echo $wolf_twitter->twitter( $username, $count , true);
+	echo $wolf_twitter->twitter( $username, $count , true );
 }
 
 } // end class check
